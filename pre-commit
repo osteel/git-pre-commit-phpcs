@@ -29,7 +29,7 @@ fi
 # Run the sniffer
 echo "Running PHP_CodeSniffer using the PSR-12 standard"
 echo
-COMMAND=("$DIR/phpcs" "--standard=$STANDARD" "--encoding=utf-8" "-p" "${FILES}")
+COMMAND=("$DIR/phpcs" "--standard=$STANDARD" "--encoding=utf-8" "-p" $(IFS=$'\n'; echo "${FILES[*]}"))
 "${COMMAND[@]}"
 
 # Syntax OK
@@ -49,7 +49,7 @@ then
 fi
 
 # Run the beautifier
-COMMAND=("$DIR/phpcbf" "--standard=$STANDARD" "${FILES}")
+COMMAND=("$DIR/phpcbf" "--standard=$STANDARD" $(IFS=$'\n'; echo "${FILES[*]}"))
 "${COMMAND[@]}"
 
 # Stage the files
@@ -58,7 +58,7 @@ echo
 git add ${FILES}
 
 # Run the sniffer again
-COMMAND=("$DIR/phpcs" "--standard=$STANDARD" "--encoding=utf-8" "-p" "${FILES}")
+COMMAND=("$DIR/phpcs" "--standard=$STANDARD" "--encoding=utf-8" "-p" $(IFS=$'\n'; echo "${FILES[*]}"))
 "${COMMAND[@]}"
 
 # Some violations remain
