@@ -1,0 +1,70 @@
+#!/bin/bash
+
+STANDARD="PSR12"
+DIR="./vendor/bin"
+
+echo
+echo "PHP_CodeSniffer pre-commit hook – commit with the --no-verify option to skip the hook"
+echo
+
+# Check whether PHP_CodeSniffer can be found
+if [ ! -f "$DIR/phpcs" ]
+then
+    echo "PHP_CodeSniffer not found – is it installed? 'composer require --dev squizlabs/php_codesniffer'"
+    echo
+    exit 1
+fi
+
+# Retrieve staged files
+FILES=`git diff --cached --name-only --diff-filter=ACMR HEAD | grep \\\\.php`
+
+# Nothing to analyse
+if [ "${FILES}" == "" ]
+then
+    echo "No changes nor new files to analyse!"
+    echo
+    exit 0
+fi
+
+# Run the sniffer
+echo "Running PHP_CodeSniffer using the PSR-12 standard"
+echo
+COMMAND=("$DIR/phpcs" "--standard=$STANDARD" "--encoding=utf-8" "-p" "${FILES}")
+"${COMMAND[@]}"
+
+# Syntax OK
+if [ $? == 0 ]
+then
+    echo "Nothing to fix!"
+    echo
+    exit 0
+fi
+
+# Fix automatically?
+read -p "Automatically fix violations when possible? [Y/n]: " < /dev/tty
+if [[ ! ("$REPLY" == 'y' || "$REPLY" == 'Y' || "$REPLY" == '') ]]
+then
+    echo
+    exit 1
+fi
+
+# Run the beautifier
+COMMAND=("$DIR/phpcbf" "--standard=$STANDARD" "${FILES}")
+"${COMMAND[@]}"
+
+# Stage the files
+echo "Re-staging updated files"
+echo
+git add ${FILES}
+
+# Run the sniffer again
+COMMAND=("$DIR/phpcs" "--standard=$STANDARD" "--encoding=utf-8" "-p" "${FILES}")
+"${COMMAND[@]}"
+
+# Some violations remain
+if [ $? != 0 ]
+then
+    echo "PHP_CodeSniffer was not able to fix all of the violations, please fix the remaining ones manually or commit with the --no-verify option"
+    echo
+    exit 1
+fi
