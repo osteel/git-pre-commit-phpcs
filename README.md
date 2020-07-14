@@ -12,7 +12,9 @@ Make sure it is executable:
 $ chmod +x pre-commit
 ```
 
-Install PHP_CodeSniffer as a Composer dependency:
+Install PHP_CodeSniffer following one of the [suggested methods](https://github.com/squizlabs/PHP_CodeSniffer#installation).
+
+I personally like to install it for the projects that need it only, as a Composer dependency:
 
 ```
 $ composer require --dev squizlabs/php_codesniffer
@@ -22,7 +24,7 @@ $ composer require --dev squizlabs/php_codesniffer
 
 The default standard is [PSR-12](https://www.php-fig.org/psr/psr-12/), but you can change it by updating the `STANDARD` variable at the top of the file.
 
-Likewise, as the `vendor` folder isn't always at the same level as the `.git` folder, you can change its location by updating the `VENDOR` variable.
+Likewise, the script assumes that PHP_CodeSniffer's `bin` folder is at the same level as the `.git` folder by default, but you can set a different location by updating the `BIN` variable.
 
 For other standards and options, please visit the [usage page](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage).
 

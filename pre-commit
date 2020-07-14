@@ -1,14 +1,14 @@
 #!/bin/bash
 
 STANDARD="PSR12"
-VENDOR="./vendor"
+BIN="./vendor/bin"
 
 echo
 echo "PHP_CodeSniffer pre-commit hook – commit with the --no-verify option to skip the hook"
 echo
 
 # Check whether PHP_CodeSniffer can be found
-if [ ! -f "$VENDOR/bin/phpcs" ]
+if [ ! -f "$BIN/phpcs" ]
 then
     echo "PHP_CodeSniffer not found – is it installed? 'composer require --dev squizlabs/php_codesniffer'"
     echo
@@ -21,7 +21,7 @@ FILES=$(git diff --cached --name-only --diff-filter=ACMR HEAD)
 # Run the sniffer
 echo "Running PHP_CodeSniffer using the $STANDARD standard"
 echo
-PHPCS=("$VENDOR/bin/phpcs" "--standard=$STANDARD" "--filter=gitstaged" "--encoding=utf-8" "-p" ".")
+PHPCS=("$BIN/phpcs" "--standard=$STANDARD" "--filter=gitstaged" "--encoding=utf-8" "-p" ".")
 "${PHPCS[@]}"
 
 # Syntax OK
@@ -41,7 +41,7 @@ then
 fi
 
 # Run the beautifier
-PHPCBF=("$VENDOR/bin/phpcbf" "--standard=$STANDARD" "--filter=gitstaged" ".")
+PHPCBF=("$BIN/phpcbf" "--standard=$STANDARD" "--filter=gitstaged" ".")
 "${PHPCBF[@]}"
 
 # Stage the files
