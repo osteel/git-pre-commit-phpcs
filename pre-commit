@@ -1,14 +1,14 @@
 #!/bin/bash
 
 STANDARD="PSR12"
-DIR="./vendor/bin"
+VENDOR="./vendor"
 
 echo
 echo "PHP_CodeSniffer pre-commit hook – commit with the --no-verify option to skip the hook"
 echo
 
 # Check whether PHP_CodeSniffer can be found
-if [ ! -f "$DIR/phpcs" ]
+if [ ! -f "$VENDOR/bin/phpcs" ]
 then
     echo "PHP_CodeSniffer not found – is it installed? 'composer require --dev squizlabs/php_codesniffer'"
     echo
@@ -16,26 +16,18 @@ then
 fi
 
 # Retrieve staged files
-FILES=`git diff --cached --name-only --diff-filter=ACMR HEAD | grep \\\\.php`
-
-# Nothing to analyse
-if [ "${FILES}" == "" ]
-then
-    echo "No changes nor new files to analyse!"
-    echo
-    exit 0
-fi
+FILES=$(git diff --cached --name-only --diff-filter=ACMR HEAD)
 
 # Run the sniffer
-echo "Running PHP_CodeSniffer using the PSR-12 standard"
+echo "Running PHP_CodeSniffer using the $STANDARD standard"
 echo
-COMMAND=("$DIR/phpcs" "--standard=$STANDARD" "--encoding=utf-8" "-p" $(IFS=$'\n'; echo "${FILES[*]}"))
-"${COMMAND[@]}"
+PHPCS=("$VENDOR/bin/phpcs" "--standard=$STANDARD" "--filter=gitstaged" "--encoding=utf-8" "-p" ".")
+"${PHPCS[@]}"
 
 # Syntax OK
 if [ $? == 0 ]
 then
-    echo "Nothing to fix!"
+    echo "No violations detected"
     echo
     exit 0
 fi
@@ -49,8 +41,8 @@ then
 fi
 
 # Run the beautifier
-COMMAND=("$DIR/phpcbf" "--standard=$STANDARD" $(IFS=$'\n'; echo "${FILES[*]}"))
-"${COMMAND[@]}"
+PHPCBF=("$VENDOR/bin/phpcbf" "--standard=$STANDARD" "--filter=gitstaged" ".")
+"${PHPCBF[@]}"
 
 # Stage the files
 echo "Re-staging updated files"
@@ -58,8 +50,7 @@ echo
 git add ${FILES}
 
 # Run the sniffer again
-COMMAND=("$DIR/phpcs" "--standard=$STANDARD" "--encoding=utf-8" "-p" $(IFS=$'\n'; echo "${FILES[*]}"))
-"${COMMAND[@]}"
+"${PHPCS[@]}"
 
 # Some violations remain
 if [ $? != 0 ]
